@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>StaySync Demo</title>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+body{margin:0}
+</style>
+</head>
+
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+const expiry = new Date("2026-04-30");
+
+if(new Date() > expiry){
+document.body.innerHTML="Demo expired. Contact developer.";
+}
+
+// PASTE YOUR JSX FILE BELOW
+import { useState, useEffect, useRef } from "react";
+
+// ─── GOOGLE FONTS ─────────────────────────────────────────────────────────────
+const FontLink = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+    :root {
+      --navy: #0F1629; --navy2: #1A2340;
+      --indigo: #4F46E5; --indigo-light: #6366F1; --indigo-pale: #EEF2FF;
+      --amber: #F59E0B; --amber-pale: #FFFBEB;
+      --red: #EF4444; --red-pale: #FEF2F2;
+      --green: #10B981; --green-pale: #ECFDF5;
+      --teal: #0D9488; --teal-pale: #F0FDFA;
+      --slate: #64748B; --slate-light: #94A3B8;
+      --border: #E2E8F0; --bg: #F8FAFC; --card: #FFFFFF;
+      --wa-green: #25D366;
+    }
+    body { margin:0; background:var(--bg); overflow-x:hidden; }
+    .screen { min-height:100vh; }
+    input:focus, textarea:focus { outline:none; }
+    button { transition: all .15s; }
+    button:active { transform: scale(0.97); }
+    .fade-in { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);} }
+    .slide-up { animation: slideUp 0.3s cubic-bezier(.16,1,.3,1); }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
+    .glow-pulse { animation: glowPulse 2.5s ease-in-out infinite; }
+    @keyframes glowPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3);}50%{box-shadow:0 0 0 8px rgba(239,68,68,0);} }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to{ transform: rotate(360deg); } }
+    .pop-in { animation: popIn .3s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes popIn { from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);} }
+    .count-up { animation: countUp .6s ease-out; }
+    @keyframes countUp { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+    ::-webkit-scrollbar { width:4px; height:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:4px; }
+    .chip { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px; }
+    .chip-green { background:var(--green-pale); color:#059669; }
+    .chip-red { background:var(--red-pale); color:#DC2626; }
+    .chip-amber { background:var(--amber-pale); color:#D97706; }
+    .chip-indigo { background:var(--indigo-pale); color:var(--indigo); }
+    .chip-slate { background:#F1F5F9; color:var(--slate); }
+    .chip-teal { background:var(--teal-pale); color:var(--teal); }
+    .chip-wa { background:#DCF8C6; color:#128C7E; }
+    /* ── risk badges ── */
+    .risk-low { background:#ECFDF5; color:#059669; border:1px solid #6EE7B7; }
+    .risk-medium { background:#FFFBEB; color:#B45309; border:1px solid #FCD34D; }
+    .risk-high { background:#FEF2F2; color:#DC2626; border:1px solid #FECACA; }
+    .stat-card { background:var(--card); border-radius:16px; padding:16px; border:1px solid var(--border); }
+    .card { background:var(--card); border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+    .btn-primary { background:var(--indigo); color:#fff; border:none; border-radius:12px; padding:14px 24px; font-size:15px; font-weight:600; cursor:pointer; width:100%; }
+    .btn-primary:hover { background:var(--indigo-light); }
+    .btn-ghost { background:transparent; border:1.5px solid var(--border); border-radius:12px; padding:12px 20px; font-size:14px; font-weight:500; cursor:pointer; color:#334155; }
+    .btn-ghost:hover { background:var(--bg); }
+    /* ── WhatsApp button ── */
+    .btn-wa { background:#25D366; color:#fff; border:none; border-radius:10px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+    .btn-wa:hover { background:#1DA851; }
+    .btn-wa-ghost { background:#DCF8C6; color:#128C7E; border:1.5px solid #A7F3D0; border-radius:10px; padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+    /* ── payment link button ── */
+    .btn-upi { background:linear-gradient(135deg,#6B46C1,#4F46E5); color:#fff; border:none; border-radius:10px; padding:10px 14px; font-size:13px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+    .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .section-title { font-size:16px; font-weight:700; color:#0F172A; }
+    .see-all { font-size:13px; color:var(--indigo); font-weight:600; cursor:pointer; background:none; border:none; }
+    .input-field { width:100%; padding:13px 14px; background:#F8FAFC; border:1.5px solid var(--border); border-radius:12px; font-size:15px; color:#0F172A; transition:border .15s; }
+    .input-field:focus { border-color:var(--indigo); background:#fff; }
+    .tab-bar { display:flex; gap:2px; background:#F1F5F9; border-radius:12px; padding:3px; }
+    .tab-item { flex:1; padding:8px; text-align:center; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; color:var(--slate); }
+    .tab-item.active { background:#fff; color:var(--indigo); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .avatar { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
+    .progress-bar { height:6px; background:#E2E8F0; border-radius:10px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:10px; transition:width .6s ease; }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; display:flex; align-items:flex-end; }
+    .modal-sheet { background:#fff; border-radius:24px 24px 0 0; width:100%; max-height:90vh; overflow-y:auto; padding:24px; }
+    .modal-handle { width:40px; height:4px; background:#E2E8F0; border-radius:4px; margin:0 auto 20px; }
+    .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--border); display:flex; z-index:50; padding-bottom:env(safe-area-inset-bottom,8px); }
+    .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 4px 8px; cursor:pointer; transition:color .15s; color:var(--slate-light); }
+    .nav-item.active { color:var(--indigo); }
+    .nav-icon { font-size:20px; line-height:1; }
+    .nav-label { font-size:10px; font-weight:600; letter-spacing:.2px; }
+    .page-header { background:#fff; border-bottom:1px solid var(--border); padding:16px 20px 14px; position:sticky; top:0; z-index:40; }
+    .list-item { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #F1F5F9; cursor:pointer; transition:background .1s; }
+    .list-item:last-child { border-bottom:none; }
+    .list-item:hover { background:#FAFBFC; }
+    .otp-input { width:52px; height:60px; border:2px solid var(--border); border-radius:14px; text-align:center; font-size:24px; font-weight:700; color:#0F172A; background:#F8FAFC; transition:all .15s; }
+    .otp-input:focus { border-color:var(--indigo); background:#fff; box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+    .room-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .room-card { background:#fff; border-radius:16px; border:1px solid var(--border); padding:14px; cursor:pointer; transition:all .15s; }
+    .room-card:hover { border-color:var(--indigo); box-shadow:0 2px 12px rgba(79,70,229,.08); }
+    .bed-dot { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; }
+    .bed-occupied { background:#EEF2FF; color:var(--indigo); }
+    .bed-vacant { background:#F0FDF4; color:#16A34A; border:1.5px dashed #86EFAC; }
+    .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#0F172A; color:#fff; padding:12px 20px; border-radius:12px; font-size:14px; font-weight:500; z-index:200; animation:toastIn .3s ease; white-space:nowrap; max-width:90vw; }
+    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(-10px);}to{opacity:1;transform:translateX(-50%) translateY(0);} }
+    .swipe-action { display:flex; gap:8px; padding:14px 16px; border-bottom:1px solid #F1F5F9; cursor:pointer; transition:background .1s; align-items:center; }
+    .swipe-action:hover { background:#FAFBFC; }
+    /* ── sparkline + chart ── */
+    .sparkline-path { stroke-dasharray:500; stroke-dashoffset:500; animation:drawLine 1.2s ease forwards; }
+    @keyframes drawLine { to{ stroke-dashoffset:0; } }
+    /* ── vacancy loss card ── */
+    .vacancy-loss-card { background:linear-gradient(135deg,#1e293b,#334155); border-radius:16px; padding:16px; color:#fff; position:relative; overflow:hidden; }
+    .vacancy-loss-card::before { content:''; position:absolute; width:120px; height:120px; background:rgba(239,68,68,.12); border-radius:50%; top:-30px; right:-20px; }
+    /* ── broadcast ── */
+    .template-btn { background:#F8FAFC; border:1.5px solid var(--border); border-radius:12px; padding:10px 12px; font-size:13px; font-weight:500; cursor:pointer; text-align:left; width:100%; color:#334155; transition:all .15s; }
+    .template-btn.selected { background:var(--indigo-pale); border-color:var(--indigo); color:var(--indigo); }
+    /* ── analytics chart bars ── */
+    .chart-bar { border-radius:6px 6px 0 0; transition:height .6s cubic-bezier(.34,1.2,.64,1); }
+    /* ── sent badge ── */
+    .sent-badge { display:inline-flex; align-items:center; gap:4px; background:#ECFDF5; color:#059669; border-radius:8px; padding:5px 10px; font-size:11px; font-weight:700; }
+    /* ── reminder row ── */
+    .reminder-row { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #F1F5F9; }
+    .reminder-row:last-child { border-bottom:none; }
+    /* ── trend arrow ── */
+    .trend-up { color:#10B981; font-size:12px; font-weight:700; }
+    .trend-down { color:#EF4444; font-size:12px; font-weight:700; }
+    /* ── number counter ── */
+    .big-num { font-size:28px; font-weight:800; letter-spacing:-1px; }
+  `}</style>
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MOCK DATA (base)
+// ══════════════════════════════════════════════════════════════════════════════
+const PG_INFO = {
+  name:"Sunrise PG", location:"Koramangala, Bengaluru",
+  owner:"Rajesh Kumar", phone:"9876543210",
+  totalRooms:12, totalBeds:36,
+};
+
+const ROOMS = [
+  { id:"R01", number:"101", floor:1, type:"Triple", capacity:3, occupied:3, rent:7500, amenities:["AC","WiFi","Attached Bath"] },
+  { id:"R02", number:"102", floor:1, type:"Double", capacity:2, occupied:1, rent:9000, amenities:["AC","WiFi"] },
+  { id:"R03", number:"103", floor:1, type:"Single", capacity:1, occupied:1, rent:12000, amenities:["AC","WiFi","Attached Bath"] },
+  { id:"R04", number:"201", floor:2, type:"Triple", capacity:3, occupied:2, rent:7500, amenities:["AC","WiFi"] },
+  { id:"R05", number:"202", floor:2, type:"Double", capacity:2, occupied:2, rent:9000, amenities:["AC","WiFi","Attached Bath"] },
+  { id:"R06", number:"203", floor:2, type:"Triple", capacity:3, occupied:3, rent:7000, amenities:["Fan","WiFi"] },
+  { id:"R07", number:"301", floor:3, type:"Single", capacity:1, occupied:0, rent:11000, amenities:["AC","WiFi","Attached Bath"] },
+  { id:"R08", number:"302", floor:3, type:"Double", capacity:2, occupied:1, rent:8500, amenities:["AC","WiFi"] },
+  { id:"R09", number:"303", floor:3, type:"Triple", capacity:3, occupied:2, rent:7000, amenities:["Fan","WiFi"] },
+  { id:"R10", number:"401", floor:4, type:"Single", capacity:1, occupied:1, rent:12500, amenities:["AC","WiFi","Attached Bath"] },
+  { id:"R11", number:"402", floor:4, type:"Double", capacity:2, occupied:0, rent:9500, amenities:["AC","WiFi"] },
+  { id:"R12", number:"403", floor:4, type:"Triple", capacity:3, occupied:3, rent:7500, amenities:["AC","WiFi"] },
+];
+
+// ── TENANTS — enhanced with riskScore, latePayments, complaintCount ──────────
+const TENANTS = [
+  { id:"T001", name:"Arjun Sharma",  room:"101", bed:"A", phone:"9876501234", email:"arjun@gmail.com",  joinDate:"2024-02-01", rentAmt:7500,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"AS", avatarColor:"#4F46E5", aadhar:"XXXX-XXXX-1234", deposit:15000, occupation:"Software Engineer",    riskScore:"low",    latePayments:0, complaintCount:1 },
+  { id:"T002", name:"Priya Nair",    room:"101", bed:"B", phone:"9876502345", email:"priya@gmail.com",  joinDate:"2024-03-15", rentAmt:7500,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"PN", avatarColor:"#7C3AED", aadhar:"XXXX-XXXX-2345", deposit:15000, occupation:"Data Analyst",         riskScore:"low",    latePayments:0, complaintCount:0 },
+  { id:"T003", name:"Rahul Gupta",   room:"101", bed:"C", phone:"9876503456", email:"rahul@gmail.com",  joinDate:"2023-11-01", rentAmt:7500,  rentStatus:"overdue", dueDate:"2025-03-01", avatar:"RG", avatarColor:"#DC2626", aadhar:"XXXX-XXXX-3456", deposit:15000, occupation:"Marketing Executive",  riskScore:"high",   latePayments:3, complaintCount:2 },
+  { id:"T004", name:"Sneha Reddy",   room:"102", bed:"A", phone:"9876504567", email:"sneha@gmail.com",  joinDate:"2024-01-10", rentAmt:9000,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"SR", avatarColor:"#059669", aadhar:"XXXX-XXXX-4567", deposit:18000, occupation:"Product Manager",      riskScore:"low",    latePayments:0, complaintCount:0 },
+  { id:"T005", name:"Kiran Patel",   room:"201", bed:"A", phone:"9876505678", email:"kiran@gmail.com",  joinDate:"2024-04-01", rentAmt:7500,  rentStatus:"pending", dueDate:"2025-04-05", avatar:"KP", avatarColor:"#D97706", aadhar:"XXXX-XXXX-5678", deposit:15000, occupation:"UI Designer",           riskScore:"medium", latePayments:1, complaintCount:1 },
+  { id:"T006", name:"Amit Singh",    room:"201", bed:"B", phone:"9876506789", email:"amit@gmail.com",   joinDate:"2024-02-20", rentAmt:7500,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"AS", avatarColor:"#0891B2", aadhar:"XXXX-XXXX-6789", deposit:15000, occupation:"Backend Developer",    riskScore:"low",    latePayments:0, complaintCount:0 },
+  { id:"T007", name:"Divya Menon",   room:"202", bed:"A", phone:"9876507890", email:"divya@gmail.com",  joinDate:"2023-12-01", rentAmt:9000,  rentStatus:"overdue", dueDate:"2025-02-28", avatar:"DM", avatarColor:"#BE185D", aadhar:"XXXX-XXXX-7890", deposit:18000, occupation:"Content Writer",        riskScore:"high",   latePayments:2, complaintCount:3 },
+  { id:"T008", name:"Rohit Joshi",   room:"202", bed:"B", phone:"9876508901", email:"rohit@gmail.com",  joinDate:"2024-01-05", rentAmt:9000,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"RJ", avatarColor:"#4338CA", aadhar:"XXXX-XXXX-8901", deposit:18000, occupation:"Financial Analyst",    riskScore:"low",    latePayments:0, complaintCount:0 },
+  { id:"T009", name:"Pooja Iyer",    room:"203", bed:"A", phone:"9876509012", email:"pooja@gmail.com",  joinDate:"2024-03-01", rentAmt:7000,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"PI", avatarColor:"#9333EA", aadhar:"XXXX-XXXX-9012", deposit:14000, occupation:"HR Executive",         riskScore:"low",    latePayments:0, complaintCount:1 },
+  { id:"T010", name:"Vikram Rao",    room:"302", bed:"A", phone:"9876510123", email:"vikram@gmail.com", joinDate:"2024-01-20", rentAmt:8500,  rentStatus:"pending", dueDate:"2025-04-07", avatar:"VR", avatarColor:"#0F766E", aadhar:"XXXX-XXXX-0123", deposit:17000, occupation:"DevOps Engineer",       riskScore:"medium", latePayments:1, complaintCount:1 },
+  { id:"T011", name:"Neha Kapoor",   room:"303", bed:"A", phone:"9876511234", email:"neha@gmail.com",   joinDate:"2024-02-14", rentAmt:7000,  rentStatus:"paid",    dueDate:"2025-04-01", avatar:"NK", avatarColor:"#B45309", aadhar:"XXXX-XXXX-1122", deposit:14000, occupation:"Graphic Designer",     riskScore:"low",    latePayments:0, complaintCount:0 },
+  { id:"T012", name:"Suresh Babu",   room:"401", bed:"A", phone:"9876512345", email:"suresh@gmail.com", joinDate:"2024-03-10", rentAmt:12500, rentStatus:"paid",    dueDate:"2025-04-01", avatar:"SB", avatarColor:"#1D4ED8", aadhar:"XXXX-XXXX-2233", deposit:25000, occupation:"Senior Manager",        riskScore:"low",    latePayments:0, complaintCount:0 },
+];
+
+const COMPLAINTS = [
+  { id:"C001", tenantId:"T003", tenantName:"Rahul Gupta",  room:"101", title:"Water leakage in bathroom",    description:"Persistent water leak from the overhead tank causing dampness on the ceiling and walls.", priority:"high",   status:"open",        date:"2025-04-08", category:"Plumbing",   resolvedHours:null },
+  { id:"C002", tenantId:"T007", tenantName:"Divya Menon",  room:"202", title:"AC not cooling properly",       description:"The air conditioner is not cooling effectively even at maximum setting. Been facing this for 2 weeks.", priority:"medium", status:"open",        date:"2025-04-09", category:"Electrical", resolvedHours:null },
+  { id:"C003", tenantId:"T005", tenantName:"Kiran Patel",  room:"201", title:"Broken bed frame",              description:"The bed frame in room 201 has a broken slat that makes sleeping uncomfortable.", priority:"medium", status:"in-progress", date:"2025-04-06", category:"Furniture",  resolvedHours:null },
+  { id:"C004", tenantId:"T010", tenantName:"Vikram Rao",   room:"302", title:"WiFi speed very slow",          description:"Internet speed drops significantly after 9 PM every day. Not suitable for WFH.", priority:"low",    status:"resolved",    date:"2025-04-03", category:"Internet",   resolvedHours:18 },
+  { id:"C005", tenantId:"T001", tenantName:"Arjun Sharma", room:"101", title:"Geyser not working",            description:"Hot water geyser stopped working 3 days ago. Extremely inconvenient during morning hours.", priority:"high",   status:"in-progress", date:"2025-04-10", category:"Electrical", resolvedHours:null },
+  { id:"C006", tenantId:"T009", tenantName:"Pooja Iyer",   room:"203", title:"Mosquito infestation",          description:"Mosquitoes are a serious problem especially during night. Need pest control urgently.", priority:"medium", status:"open",        date:"2025-04-11", category:"Hygiene",    resolvedHours:null },
+  { id:"C007", tenantId:"T002", tenantName:"Priya Nair",   room:"101", title:"Bathroom door lock broken",     description:"The bathroom door lock has been broken for a week.", priority:"medium", status:"resolved",    date:"2025-03-28", category:"Furniture",  resolvedHours:9 },
+  { id:"C008", tenantId:"T011", tenantName:"Neha Kapoor",  room:"303", title:"Noisy neighbours at night",     description:"Loud noise from common area after 11 PM on weekends.", priority:"low",    status:"resolved",    date:"2025-03-22", category:"Noise",      resolvedHours:6 },
+  { id:"C009", tenantId:"T006", tenantName:"Amit Singh",   room:"201", title:"Hot water not available",       description:"Common bathroom has no hot water supply since yesterday evening.", priority:"high",   status:"resolved",    date:"2025-03-18", category:"Plumbing",   resolvedHours:11 },
+];
+
+const VISITS = [
+  { id:"V001", tenantId:"T001", tenantName:"Arjun Sharma", room:"101", visitorName:"Meena Sharma",  relation:"Mother",  phone:"9811234567", date:"2025-04-13", time:"11:00 AM", purpose:"Personal visit",         status:"approved" },
+  { id:"V002", tenantId:"T004", tenantName:"Sneha Reddy",  room:"102", visitorName:"Ravi Reddy",    relation:"Brother", phone:"9822345678", date:"2025-04-14", time:"04:00 PM", purpose:"Helping with shifting",   status:"pending"  },
+  { id:"V003", tenantId:"T007", tenantName:"Divya Menon",  room:"202", visitorName:"Anjali Menon",  relation:"Friend",  phone:"9833456789", date:"2025-04-12", time:"06:30 PM", purpose:"
+
+</script>
+
+</body>
+</html>
